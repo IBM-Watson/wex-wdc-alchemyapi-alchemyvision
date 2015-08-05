@@ -1,14 +1,14 @@
 # Integrating the Watson Developer Cloud AlchemyAPI AlchemyVision Image Tagging Service with Watson Explorer
 
-[IBM Watson Explorer](http://www.ibm.com/smarterplanet/us/en/ibmwatson/explorer.html) combines search and content analytics with unique cognitive computing capabilities available through external cloud services such as [Watson Developer Cloud](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/) to help users find and understand the information they need to work more efficiently and make better, more confident decisions.
+[IBM Watson Explorer](http://www.ibm.com/smarterplanet/us/en/ibmwatson/explorer.html) combines search and content analytics with unique cognitive computing capabilities available through external cloud services such as the [Watson Developer Cloud](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/) to help users find and understand the information they need to work more efficiently and make better, more confident decisions.
 
-The [Watson AlchemyVision](http://www.alchemyapi.com/products/alchemyvision) API employs our deep learning innovations to understand a picture’s content and context. Organizations across a variety of industries — ranging from publishing and advertising to eCommerce and enterprise search — can effectively integrate images as part of big data analytics being used to make critical business decisions.
+The [Watson AlchemyVision](http://www.alchemyapi.com/products/alchemyvision) API employs deep learning innovations to understand a picture’s content and context. Organizations across a variety of industries — ranging from publishing and advertising to eCommerce and enterprise search — can effectively integrate images as part of big data analytics being used to make critical business decisions.
 
-AlchemyVision sees complex visual scenes in their entirety — without needing any textual clues — leveraging a holistic approach to understanding the multiple objects and surroundings in common smartphone photos and online images.
+The AlchemyVision API sees complex visual scenes in their entirety — without needing any textual clues — leveraging a holistic approach to understanding the multiple objects and surroundings in common smartphone photos and online images.
 
-There are additional cognitive functions available via the AlchemyAPI service in Bluemix that will be covered in other integration examples.  The full AlchemyAPI reference is available on the [AlchemyAPI website](http://www.alchemyapi.com/api).
+This example uses the AlchemyAPI service available on Bluemix, which incorporates the AlchemyVision API. There are additional cognitive functions available via this service that will be covered in other integration examples.  The full AlchemyAPI reference is available on the [AlchemyAPI website](http://www.alchemyapi.com/api).
 
-The goal of this tutorial is to demonstrate how to get started with an integration between Watson Explorer and the Watson AlchemyAPI service available on IBM Watson Developer Cloud. By the end of the tutorial you will have a modified Engine search collection that can send image data to a custom Bluemix Java application which uses AlchemyAPI for image analysis.  The Engine collection will store the AlchemyVision analysis results along with image thumbnails as search results.  Finally, you will modify an Engine display and your AppBuilder application to display the image thumbnail search results.
+The goal of this tutorial is to demonstrate how to get started with an integration between Watson Explorer and the Watson AlchemyAPI service available on Bluemix, in the IBM Watson Developer Cloud. By the end of the tutorial you will have a modified Engine search collection that can send image data to a custom Bluemix Java application which uses the AlchemyAPI service for image analysis.  The Engine collection will store the AlchemyVision analysis results along with image thumbnails as search results.  Finally, you will modify an Engine display and your AppBuilder application to display the image thumbnail search results.
 
 ![Screen shot of an Engine image search result.](images/engine-image-result.png)
 
@@ -43,12 +43,12 @@ The Bluemix documentation can be found [here](https://www.ng.bluemix.net/docs/).
 
 Navigate to the Bluemix dashboard and create a new application with Liberty for Java.
 
-A new AlchemyAPI service must be created via the ACE Bluemix web UI.  The AlchemyAPI service cannot be created via the command line.  Navigate to the Bluemix dashboard and create a new AlchemyAPI service.  Notice that you are required to provide your AlchemyAPI key when the service is created.  Notice also that you must supply the name of the application you just created.  For the sake of the example, we have chosen to name the service `wex-AlchemyAPI`.  Notice that "user-provided" is the only available service plan for AlchemyAPI right now.
+A new AlchemyAPI service must be created via the Bluemix web UI.  The AlchemyAPI service cannot be created via the command-line.  Navigate to the Bluemix dashboard and create a new AlchemyAPI service.  Notice that you are required to provide your AlchemyAPI key when the service is created.  Notice also that you must supply the name of the application you just created.  For the sake of the example, we have chosen to name the service `wex-AlchemyAPI`.  Notice that "user-provided" is the only available service plan for AlchemyAPI right now.
 
    
 ### Configuring and Deploying the Watson AlchemyAPI AlchemyVision Image Tagging application in Bluemix
 
-Clone this Git repository, or download the zip, extract, and navigate to the repository directory on the commandline.
+Clone this Git repository, or download the zip, extract, and navigate to the repository directory on the command-line.
 
 The example Bluemix application uses a `manifest.yml` file to specify the application name, services bindings, and basic application settings.  Using a manifest simplifies distribution and deployment of CloudFoundry applications.
 
@@ -130,7 +130,7 @@ Other settings are provided in the Image to VXML converter which allow the admin
 
 ### Installing and Configuring the AlchemyVision Image Tagging Converter
 
-At this point, you should be able to successfully crawl and index some image URLs.  Let's set up the Image Tagging Converter to add some analysis to those indexed images.  The steps for adding this converter are similar to adding the image converter above.
+At this point, you should be able to successfully crawl and index some image URLs.  Let's set up the AlchemyVision Image Tagging Converter to add some analysis to those indexed images.  The steps for adding this converter are similar to adding the image converter above.
 
 1. In Engine, create a new XML Element by ensuring you are on the **Configuration** tab of the admin tool and then clicking the "+" across from "XML" in the left menu.  The element and name can have any value.
 2. Copy the entire contents of [function.vse-converter-alchemyapi-alchemyvision-imagetag-bluemix.xml](/engine/function.vse-converter-alchemyapi-alchemyvision-imagetag-bluemix.xml).
@@ -186,12 +186,12 @@ Now that your image entity is configured, search your app.  Try a search for a t
 
 - See the [AlchemyAPI AlchemyVision](http://www.alchemyapi.com/products/alchemyvision) site for image analysis use cases.
 - Modify function **vse-converter-link-extraction-templates** (which is used by the **HTML to XML** converter to extract and enqueue links) to enqueue the URLs in `<img>` tags.  Enqueue image URLs along with their "alt" text, caption, other surrounding text, etc., to provide more opportunity for query term matches.
-- Use additional command line options to the ImageMagick® convert program to add a boarder to the indexed thumbnail, add a watermark to the indexed thumbnail, or other additional image processing.
+- Use additional command line options to the ImageMagick® converter program to add a border to the indexed thumbnail, add a watermark to the indexed thumbnail, or other additional image processing.
 - Create a new converter that intercepts all image data and enqueues it to a *different collection*.  This would allow you to create a separate image collection for any document collection.
 
 # Implementation Considerations
 
-- **Crawl Performance** - An image crawl can be expensive compared to a typical data crawl.  Image data is generally large, and it must be fetched from its source, converted to a thumbnail, sent to the AlchemyAPI service over the network, and analysed by the AlchemyAPI service.
+- **Crawl Performance** - An image crawl can be expensive compared to a typical data crawl.  Image data is generally large, and it must be fetched from its source, converted to a thumbnail, sent to the AlchemyAPI service over the network, and analyzed by the AlchemyAPI service.
 - **Query Performance** - Again, image data is generally large.  Image results may contain significantly more data than text results, which will impact performance.  Image thumbnail dimensions and color depth can be reduced via converter settings, but be aware that reducing size will also reduce quality.  It may also help to reduce the number of results requested via the Engine project setting.
 - **Privacy and Security** - The AlchemyAPI AlchemyVision Image Tag converter makes a web request to the Bluemix application endpoint.  In this example, this call is made over an unencrypted and unauthenticated HTTP connection, but your Bluemix application can be modified to support better security.
 - **Failures will happen** - All distributed systems are inherently unreliable and failures will inevitably occur when attempting to call out to Bluemix.  Consider how failures should be handled.
