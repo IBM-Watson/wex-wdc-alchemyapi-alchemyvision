@@ -93,24 +93,24 @@ With the default Engine configuration, only text is indexed, not images.  Images
 In fact, the default collection configuration contains a crawl filter and a converter filter that eliminates most image filetypes.  The first step to using the image converter is to allow image filetypes.
 
 1. Create a new collection and navigate to the crawling configuration tab.  Click the **edit** button across from the "**Binary file extensions (filter)**" crawl condition.  Add the following in the **Extensions to keep** setting:
-```
-*.jpg
-*.JPG
-*.jpeg
-*.JPEG
-*.png
-*.PNG
-*.tif
-*.TIF
-*.tiff
-*.TIFF
-*.gif
-*.GIF
-```
-![Screen shot of extensions to keep.](images/extensions-to-keep.png) 
-Note that ImageMagick® can handle many additional image types.  You may add wildcards to this list for any image type that ImageMagick® handles.
+   ```
+   *.jpg
+   *.JPG
+   *.jpeg
+   *.JPEG
+   *.png
+   *.PNG
+   *.tif
+   *.TIF
+   *.tiff
+   *.TIFF
+   *.gif
+   *.GIF
+   ```
+   ![Screen shot of extensions to keep.](images/extensions-to-keep.png) 
+   Note that ImageMagick® can handle many additional image types.  You may add wildcards to this list for any image type that ImageMagick® handles.
 2. Now add a new crawl condition to properly identify these image types.  Click the **Add a new condition** button and select **Custom conditional settings**.  Add the same wildcard list above to the new crawl condition to apply the condition to all incoming image URLs.  Then open the **Retrieval and encodings** section and specify `image` as the **Default content type**.
-![Screen shot of the new crawl condition.](images/new-crawl-condition.png)
+   ![Screen shot of the new crawl condition.](images/new-crawl-condition.png)
 3. The default collection configuration includes a list of **Text cache content types**.  If URL data, during conversion, ever becomes any of the listed content types, the data will be saved in a database.  This "cached" version of the data is made available at query time via the "cache" link in search results.  However, this cache feature does not make sense for image results.  Clear the list of **Text cache content types** in the **Converting** section of the **Crawling** tab.
 4. The default collection configuration includes a binary extensions filter converter as well.  This is designed to eliminate indexing of images extracted from successfully crawled data.  For example, a zip file containing images will not be filtered by the crawl condition.  Let's allow these images by navigating to the converting tab and clicking **edit** across from the **Binary file extensions (filter)** converter.  Once again, paste the wildcard list from step 1 into the **Extensions to keep** setting and click **OK**.
 
