@@ -93,6 +93,7 @@ With the default Engine configuration, only text is indexed, not images.  Images
 In fact, the default collection configuration contains a crawl filter and a converter filter that eliminates most image filetypes.  The first step to using the image converter is to allow image filetypes.
 
 1. Create a new collection and navigate to the crawling configuration tab.  Click the **edit** button across from the "**Binary file extensions (filter)**" crawl condition.  Add the following in the **Extensions to keep** setting:
+
    ```
    *.jpg
    *.JPG
@@ -107,6 +108,7 @@ In fact, the default collection configuration contains a crawl filter and a conv
    *.gif
    *.GIF
    ```
+
    ![Screen shot of extensions to keep.](images/extensions-to-keep.png) 
    Note that ImageMagick® can handle many additional image types.  You may add wildcards to this list for any image type that ImageMagick® handles.
 2. Now add a new crawl condition to properly identify these image types.  Click the **Add a new condition** button and select **Custom conditional settings**.  Add the same wildcard list above to the new crawl condition to apply the condition to all incoming image URLs.  Then open the **Retrieval and encodings** section and specify `image` as the **Default content type**.
