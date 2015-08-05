@@ -2,13 +2,13 @@
 
 [IBM Watson Explorer](http://www.ibm.com/smarterplanet/us/en/ibmwatson/explorer.html) combines search and content analytics with unique cognitive computing capabilities available through external cloud services such as [Watson Developer Cloud](http://www.ibm.com/smarterplanet/us/en/ibmwatson/developercloud/) to help users find and understand the information they need to work more efficiently and make better, more confident decisions.
 
-The [Watson AlchemyVision](http://www.alchemyapi.com/products/alchemyvision) API employs our deep learning innovations to understand a picture’s content and context. Organizations across a variety of industries—ranging from publishing and advertising to eCommerce and enterprise search—can effectively integrate images as part of big data analytics being used to make critical business decisions.
+The [Watson AlchemyVision](http://www.alchemyapi.com/products/alchemyvision) API employs our deep learning innovations to understand a pictureâ€™s content and context. Organizations across a variety of industries â€” ranging from publishing and advertising to eCommerce and enterprise search â€” can effectively integrate images as part of big data analytics being used to make critical business decisions.
 
-AlchemyVision sees complex visual scenes in their entirety — without needing any textual clues — leveraging a holistic approach to understanding the multiple objects and surroundings in common smartphone photos and online images.
+AlchemyVision sees complex visual scenes in their entirety â€” without needing any textual clues â€” leveraging a holistic approach to understanding the multiple objects and surroundings in common smartphone photos and online images.
 
 There are additional cognitive functions available via the AlchemyAPI service in Bluemix that will be covered in other integration examples.  The full AlchemyAPI reference is available on the [AlchemyAPI website](http://www.alchemyapi.com/api).
 
-The goal of this tutorial is to demonstrate how to get started with an integration between Watson Explorer and the Watson AlchemyAPI service available on IBM Watson Developer Cloud. By the end of the tutorial you will have a modified Engine search collection that can send image data to a custome Bluemix Java application which uses AlchemyAPI for image analysis.  The Engine collection will also store the analysis results along with image thumbnails as search results.  Finally, you will modify an Engine display and your AppBuilder application to display the image thumbnail search results.
+The goal of this tutorial is to demonstrate how to get started with an integration between Watson Explorer and the Watson AlchemyAPI service available on IBM Watson Developer Cloud. By the end of the tutorial you will have a modified Engine search collection that can send image data to a custom Bluemix Java application which uses AlchemyAPI for image analysis.  The Engine collection will store the AlchemyVision analysis results along with image thumbnails as search results.  Finally, you will modify an Engine display and your AppBuilder application to display the image thumbnail search results.
 
 ![Screen shot of an Engine image search result.](images/engine-image-result.png)
 
@@ -26,8 +26,8 @@ Please see the [Introduction](https://github.com/Watson-Explorer/wex-wdc-integra
 This tutorial will walk through the creation and deployment of four components.
 
 1. A basic Bluemix application exposing the Watson AlchemyAPI service as a web service.
-2. The ImageMagick® package.
-3. A Watson Explorer Engine image converter.  This converter uses ImageMagick® to produce a thumbnail, and then converts the thumbnail to VXML.
+2. The ImageMagickÂ® package.
+3. A Watson Explorer Engine image converter.  This converter uses ImageMagickÂ® to produce a thumbnail, and then converts the thumbnail to VXML.
 4. A Watson Explorer Engine AlchemyVision converter.  This converter sends an image to the Bluemix application, which in turn sends the image to the AlchemyVision service for analysis.  The converter takes the analysis response and converts it to VXML.
 
 Simple modifications to the Engine and AppBuilder result display are also made to properly render image thumbnails as search results.
@@ -35,7 +35,7 @@ Simple modifications to the Engine and AppBuilder result display are also made t
 
 ## Step-by-Step Tutorial
 
-This section provides details on the steps required to create an AlchemyAPI service in Bluemix, deploy a basic Watson AlchemyVision application in Bluemix, install ImageMagick®, install the new image and AlchemyVision converters, and make changes to Engine and AppBuilder result displays.
+This section provides details on the steps required to create an AlchemyAPI service in Bluemix, deploy a basic Watson AlchemyVision application in Bluemix, install ImageMagickÂ®, install the new image and AlchemyVision converters, and make changes to Engine and AppBuilder result displays.
 
 ### Creating the AlchemyAPI service and application in Bluemix
 
@@ -46,7 +46,7 @@ Navigate to the Bluemix dashboard and create a new application with Liberty for 
 A new AlchemyAPI service must be created via the ACE Bluemix web UI.  The AlchemyAPI service cannot be created via the command line.  Navigate to the Bluemix dashboard and create a new AlchemyAPI service.  Notice that you are required to provide your AlchemyAPI key when the service is created.  Notice also that you must supply the name of the application you just created.  For the sake of the example, we have chosen to name the service `wex-AlchemyAPI`.  Notice that "user-provided" is the only available service plan for AlchemyAPI right now.
 
    
-### Configuring and Deploying the Watson AlchemyAPI AlchemyVision Image Tagging Application in Bluemix
+### Configuring and Deploying the Watson AlchemyAPI AlchemyVision Image Tagging application in Bluemix
 
 Clone this Git repository, or download the zip, extract, and navigate to the repository directory on the commandline.
 
@@ -78,13 +78,13 @@ $> cf push
 
 Once the application has finished restarting, you can now view the route that was created for your application with `cf routes`.  The running application URL can be determined by combining the host and domain from the routes listing.  You can also find this information in the `manifest.yml` file.
 
-### Installing ImageMagick®
+### Installing ImageMagickÂ®
 
-[ImageMagick®](http://www.imagemagick.org/) is a software suite used to create, edit, compose, or convert images.  ImageMagick® is free software delivered as a ready-to-run binary distribution or as source code that you may use, copy, modify, and distribute in both open and proprietary applications.  It is distributed under the [Apache 2.0 license](http://www.imagemagick.org/script/license.php).
+[ImageMagickÂ®](http://www.imagemagick.org/) is a software suite used to create, edit, compose, or convert images.  ImageMagickÂ® is free software delivered as a ready-to-run binary distribution or as source code that you may use, copy, modify, and distribute in both open and proprietary applications.  It is distributed under the [Apache 2.0 license](http://www.imagemagick.org/script/license.php).
 
-Navigate to the [ImageMagick® download page](http://www.imagemagick.org/script/binary-releases.php) and follow the instructions for your operating system to download and install ImageMagick®.  Linux users may find that an ImageMagick® package is already installed, or available from a package repository.
+Navigate to the [ImageMagickÂ® download page](http://www.imagemagick.org/script/binary-releases.php) and follow the instructions for your operating system to download and install ImageMagickÂ®.  Linux users may find that an ImageMagickÂ® package is already installed, or available from a package repository.
 
-Once installation is complete, make a note of the location of the `convert` binary that is part of the ImageMagick® suite.  Ensure that the path to ImageMagick binaries is part of the path environment variable for your web server user.  You will need this path information when you configure the converters in the next steps.
+Once installation is complete, make a note of the location of the `convert` binary that is part of the ImageMagickÂ® suite.  **Ensure that the path to ImageMagickÂ® binaries is part of the path environment variable for your web server user**.  You will need this path information when you configure the converters in the next steps.
 
 ### Installing and Configuring the Engine Image Converter
 
@@ -108,14 +108,13 @@ In fact, the default collection configuration contains a crawl filter and a conv
 *.GIF
 ```
 ![Screen shot of extensions to keep.](images/extensions-to-keep.png)
-Note that ImageMagick can handle many additional image types.  You may add wildcards to this list for any image type that ImageMagick handles.
-
+Note that ImageMagickÂ® can handle many additional image types.  You may add wildcards to this list for any image type that ImageMagickÂ® handles.
 2. Now add a new crawl condition to properly identify these image types.  Click the **Add a new condition** button and select **Custom conditional settings**.  Add the same wildcard list above to the new crawl condition to apply the condition to all incoming image URLs.  Then open the **Retrieval and encodings** section and specify `image` as the **Default content type**.
 ![Screen shot of the new crawl condition.](images/new-crawl-condition.png)
 3. The default collection configuration includes a list of **Text cache content types**.  If URL data, during conversion, ever becomes any of the listed content types, the data will be saved in a database.  This "cached" version of the data is made available at query time via the "cache" link in search results.  However, this cache feature does not make sense for image results.  Clear the list of **Text cache content types** in the **Converting** section of the **Crawling** tab.
 4. The default collection configuration includes a binary extensions filter converter as well.  This is designed to eliminate indexing of images extracted from successfully crawled data.  For example, a zip file containing images will not be filtered by the crawl condition.  Let's allow these images by navigating to the converting tab and clicking **edit** across from the **Binary file extensions (filter)** converter.  Once again, paste the wildcard list from step 1 into the **Extensions to keep** setting and click **OK**.
 
-The image converter in this repository leverages ImageMagick® to produce a thumbnail, which is then [base64](https://en.wikipedia.org/wiki/Base64) encoded and indexed.  Proper indexing attributes are used to ensure that the base64 data cannot match queries or go through clustering.  Continue with these steps to add the converter to Engine.
+The image converter in this repository leverages ImageMagickÂ® to produce a thumbnail, which is then [base64](https://en.wikipedia.org/wiki/Base64) encoded and indexed.  Proper indexing attributes are used to ensure that the base64 data cannot match queries or go through clustering.  Continue with these steps to add the converter to Engine.
 
 5. In Engine, create a new XML Element by ensuring you are on the **Configuration** tab of the admin tool and then clicking the "+" across from "XML" in the left menu.  The element and name can have any value.
 6. Copy the entire contents of [function.vse-converter-image-to-vxml.xml](/engine/function.vse-converter-image-to-vxml.xml).
@@ -144,7 +143,7 @@ Navigate back to the converting tab of your collection and click **Add a new con
 8. In the **Location of ImageMagick "convert" executable** setting, specify the complete filepath.  On Windows this defaults to `C:/Program Files/ImageMagick/convert.exe`.  On Linux this defaults to `/usr/bin/convert`.
 9. Optionally enable the knowledge graph.  At the cost of an additional AlchemyAPI transaction, this provides taxonomy data in the AlchemyAPI response.  This can be used to create a hierarchical faceting of images.
 
-Ensure that the tagging converter appears first in your list of converters and that the image converter appears second.
+Ensure that the tagging converter appears first in your list of converters and that the image converter appears second.  This is necessary to ensure that the conversion pipeline is forked by the tagging converter before the image is processed by the image converter.
 
 Try crawling some images.  Use **Test it** or a search to confirm that you are receiving and indexing image tags from Alchemy, and that you are indexing base64 image data.
 
@@ -175,7 +174,7 @@ Now that image search is working in Engine, let's configure image search in AppB
 
 1. Ensure ZooKeeper and AppBuidler services are started, and that the Engine instance containing your image collection is configured to be a backend in AppBuilder.
 2. Create a new entity for image results. Specify your image collection as the data store.
-3. Under **Search options**, make the entity searchable.  Enter **""** (*two double quotation marks*) for the title formula.
+3. Under **Search options**, make the entity searchable.  Enter **""** (*two double quotation marks*) for the **Title formula**.
 4. Still under **Search options**, create a new field and drag it up to the **SHOWN** area.  Select **thumb** for the **Field name**.  Enter **""** (*two double quotation marks*) for the **Label formula**.  Enter `("<img src='data:image/png;base64," + values.first + "'/>").html_safe` for the **Value formula**.
 5. Scroll to the bottom of the entity configuration and click **Save entity**.
 
@@ -185,7 +184,7 @@ Now that your image entity is configured, search your app.  Try a search for a t
 
 - See the [AlchemyAPI AlchemyVision](http://www.alchemyapi.com/products/alchemyvision) site for image analysis use cases.
 - Modify function **vse-converter-link-extraction-templates** (which is used by the **HTML to XML** converter to extract and enqueue links) to enqueue the URLs in `<img>` tags.  Enqueue image URLs along with their "alt" text, caption, other surrounding text, etc., to provide more opportunity for query term matches.
-- Use additional command line options to the ImageMagick convert program to add a boarder to the indexed thumbnail, add a watermark to the indexed thumbnail, or other additional image processing.
+- Use additional command line options to the ImageMagickÂ® convert program to add a boarder to the indexed thumbnail, add a watermark to the indexed thumbnail, or other additional image processing.
 - Create a new converter that intercepts all image data and enqueues it to a *different collection*.  This would allow you to create a separate image collection for any document collection.
 
 # Implementation Considerations
