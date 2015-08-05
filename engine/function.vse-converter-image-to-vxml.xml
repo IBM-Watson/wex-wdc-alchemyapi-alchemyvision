@@ -1,0 +1,74 @@
+<function name="vse-converter-image-to-vxml" type="converters" type-in="image|image/*" type-out="application/vxml-unnormalized" products="all" >
+  <prototype>
+    <label>Image to VXML</label>
+    <description>This converter uses ImageMagick to produce a PNG thumbnail and index it.  Ensure that the path to ImageMagick binaries is in the path environment variable for the web server user.
+    This converter uses system software to base64 encode the PNG thumbnail.  The expected system software is "<incode>certutil.exe</incode>" on Windows and "<incode>base64</incode>" on Linux.
+    Finally, this converter reads base64, removes some unnecessary characters if present, and puts it into a content element with appropriate attributes.</description>
+    <declare type="string" name="convert-location">
+      <label>Location of ImageMagick "convert" executable</label>
+      <description>Provide the complete path to the "convert" executable.  Also ensure that the path to ImageMagick binaries is in the path environment variable for the web server user.<p />
+On Windows this defaults to <incode>C:/Program Files/ImageMagick/convert.exe</incode>
+        <p />
+On Linux this defaults to <incode>/usr/bin/convert</incode>
+      </description>
+    </declare>
+    <declare type="positive-int" name="max-width" initial-value="256" units="pixels">
+      <label>Maximum thumbnail width</label>
+      <description>This sets the maximum width, in pixels, of the result image.  The image will be scaled down, if necessary, to achieve a width less than or equal to this value.  Aspect ratio will be preserved.</description>
+    </declare>
+    <declare type="positive-int" name="max-height" initial-value="256" units="pixels">
+      <label>Maximum thumbnail height</label>
+      <description>This sets the maximum height, in pixels, of the result image.  The image will be scaled down, if necessary, to achieve a height less than or equal to this value.  Aspect ratio will be preserved.</description>
+    </declare>
+    <declare type="flag" name="png8">
+      <label>Reduce thumbnails to 256 colors</label>
+      <description>Instead of producing a thumbnail with the same color depth as the original image, force an 8 bit color depth.  This will likely produce smaller thumbnails and therefore a smaller index and faster queries by significantly reducing thumbnail quality.</description>
+    </declare>
+  </prototype>
+  <declare name="platform" type="string" />
+  <set-var name="platform">
+    <value-of select="viv:system-information()/platform" />
+  </set-var>
+  <if test="$convert-location=''">
+    <set-var name="convert-location">
+      <choose>
+        <when test="$platform = 'windows'">C:/Program Files/ImageMagick/convert.exe</when>
+        <when test="$platform = 'linux'">/usr/bin/convert</when>
+      </choose>
+    </set-var>
+  </if>
+  <converter type-in="image|image/*" type-out="application/thumbnail" timing-name="Image to VXML - 1. image to PNG thumbnail">
+    <converter-execute>
+      <scope>"</scope>
+      <value-of-var name="convert-location" />
+      <scope>"</scope> -strip -thumbnail <scope>"</scope>
+      <value-of-var name="max-width" />x<value-of-var name="max-height" />
+      <scope>>"</scope> %source_file png<if test="$png8">8</if>:%target_file</converter-execute>
+  </converter>
+  <converter type-in="application/thumbnail" type-out="application/thumbnail-base64" timing-name="Image to VXML - 2. PNG thumbnail to base64" >
+    <choose>
+      <when test="$platform='windows'">
+        <converter-execute>"C:/Windows/System32/certutil.exe" -encode -f %source_file %target_file</converter-execute>
+      </when>
+      <when test="$platform='linux'">
+        <converter-execute><![CDATA[base64 < %source_file > %target_file]]></converter-execute>
+      </when>
+    </choose>
+  </converter>
+  <converter type-in="application/thumbnail-base64" type-out="application/vxml-unnormalized" timing-name="Image to VXML - 3. base64 thumbnail to VXML" >
+    <parser type="html-xsl"><![CDATA[<xsl:template match="/">
+  <document>
+    <content indexed="false" type="text" name="thumb" action="none" output-action="none">
+      <xsl:variable name="stripped-begin">
+        <xsl:value-of select="viv:if-else(contains( . , '-----BEGIN CERTIFICATE-----'), substring-after( . , '-----BEGIN CERTIFICATE-----'), . )" />
+      </xsl:variable>
+      <xsl:variable name="stripped-begin-and-end">
+        <xsl:value-of select="viv:if-else(contains( $stripped-begin, '-----END CERTIFICATE-----'), substring-before( $stripped-begin, '-----END CERTIFICATE-----'), $stripped-begin )" />
+      </xsl:variable>
+      <xsl:value-of select="$stripped-begin-and-end" />
+    </content>
+  </document>
+</xsl:template>
+]]></parser>
+  </converter>
+</function>

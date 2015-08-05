@@ -1,0 +1,150 @@
+<function name="vse-converter-alchemyapi-alchemyvision-imagetag-bluemix" type="converters" type-in="image|image/*" type-out="application/vxml" products="all" >
+  <prototype>
+    <description>The Watson AlchemyAPI Bluemix service offers access to AlchemyVision's image tagging API, with which you can quickly categorize and organize image libraries at a massive scale. By understanding complex visual scenes in their broader context, you can automatically extract knowledge from images and act upon what you learn.  An API key is required to use the AlchemyAPI services and can be acquired from the AlchemyAPI website (http://www.alchemyapi.com/api/register.html).<p />
+
+    See the AlchemyVision API Reference for examples and detailed information (http://www.alchemyapi.com/products/alchemyvision).<p />
+    
+This converter leverages the ImageMagick package to ensure that image file size is shrunk if it exceeds a configurable file size.  This is accomplished by converting to JPEG format and leveraging JPEG compression, which reduces image quality, not image scale.  The image is also scaled down to a "reasonably large" size to minimize the need for lossy compression.  Ensure that the path to ImageMagick binaries is in the path environment variable for the web server user.  Ensure that the maximum file size falls within AlchemyAPI's limits.<p />
+    </description>
+    <label>AlchemyAPI AlchemyVision Image Tag Bluemix Converter</label>
+    <declare type="flag" name="fork">
+      <label>Fork conversion processing</label>
+      <description>In addition to converting the input image into a set of tags from AlchemyAPI, spawn a new conversion chain with the input image.  This is useful especially in conjunction with the Image to VXML converter.</description>
+    </declare>
+    <declare type="url" name="alchemy-image-tagging-url" initial-value="http://MYAPPLICATION.mybluemix.net/api/getRankedImageKeywords">
+      <label>Bluemix application REST endpoint</label>
+      <description>Enter the REST endpoint provided by your Bluemix application.
+      </description>
+    </declare>
+    <declare type="flag" name="force-show-all">
+      <label>Include low confidence tags</label>
+      <description>Each tag is associated with a confidence score.  Normally, tags of low confidence score are dropped because they are not as valuable for most use cases.</description>
+    </declare>
+    <declare type="flag" name="knowledge-graph">
+      <label>Request knowledge graph</label>
+      <description>Enabling this option requests that the image tagging API also return the path through the knowledge graph to each tag.  This can be useful for creating structured navigation like facets.  An additional API transaction charge is incurred when this feature is enabled.</description>
+    </declare>
+    <declare type="positive-int" name="default-timeout" initial-value="60" units="seconds">
+      <label>Request timeout</label>
+      <description>This sets the amount of time, in seconds, to wait for a response from the API call.</description>
+    </declare>
+    <declare type="string" name="proxy-host-port">
+      <label>Proxy server (host:port)</label>
+      <description>This sets a proxy server through which all Bluemix application calls will be directed.  It is recommended that a local caching proxy be used to improve performance and reduce the total number of Bluemix application calls.  Specify "" to override a system proxy with no proxy.</description>
+    </declare>
+    <declare type="user-password" name="proxy-user-pass">
+      <label>Proxy username and password</label>
+      <description>Provide the credentials used to authenticate to the proxy server configured above.</description>
+    </declare>
+    <declare type="string" name="convert-location">
+      <label>Location of ImageMagick "convert" executable</label>
+      <description>Provide the complete path to the "convert" executable.  Also ensure that the path to ImageMagick binaries is in the path environment variable for the web server user.<p />
+On Windows this defaults to <incode>C:/Program Files/ImageMagick/convert.exe</incode>
+        <p />
+On Linux this defaults to <incode>/usr/bin/convert</incode>
+      </description>
+    </declare>
+    <declare type="positive-int" name="max-filesize" initial-value="1000" units="kilobytes">
+      <label>Maximum file size</label>
+      <description>This sets the maximum file size, in kilobytes, of the result image.  The JPEG encoder will search for the highest compression quality level that results in an output file that does not exceed the value.  In some instances, the output image may be marginally larger than this value.</description>
+    </declare>
+    <declare type="positive-int" name="max-width" initial-value="1024" units="pixels">
+      <label>Maximum width</label>
+      <description>This sets the maximum width, in pixels, of the result image.  The image will be scaled down, if necessary, to achieve a width less than or equal to this value.  Aspect ratio will be preserved.</description>
+    </declare>
+    <declare type="positive-int" name="max-height" initial-value="1024" units="pixels">
+      <label>Maximum height</label>
+      <description>This sets the maximum height, in pixels, of the result image.  The image will be scaled down, if necessary, to achieve a height less than or equal to this value.  Aspect ratio will be preserved.</description>
+    </declare>
+    <declare type="flag" name="debug">
+      <label>Enable debug contents</label>
+      <description>If debug contents are enabled, then if the AlchemyAPI image tagging service returned an error, a content containing the error message will be added to the document.  This is useful for debugging, but it may not be as valuable in your final crawl.</description>
+    </declare>
+  </prototype>
+  <declare name="platform" type="string" />
+  <set-var name="platform">
+    <value-of select="viv:system-information()/platform" />
+  </set-var>
+  <converter type-in="image|image/*" type-out="application/reduced-jpeg" timing-name="AlchemyAPI AlchemyVision - 1. image filesize limiter">
+    <if-var name="fork"><attribute name="fork"><value-of-var name="fork" /></attribute></if-var>
+    <if test="$convert-location=''">
+      <set-var name="convert-location">
+        <choose>
+          <when test="$platform = 'windows'">C:/Program Files/ImageMagick/convert.exe</when>
+          <when test="$platform = 'linux'">/usr/bin/convert</when>
+        </choose>
+      </set-var>
+    </if>
+    <converter-execute>
+      <scope>"</scope>
+      <value-of-var name="convert-location" />
+      <scope>"</scope> -strip -thumbnail <scope>"</scope>
+      <value-of-var name="max-width" />x<value-of-var name="max-height" />
+      <scope>>"</scope> -define jpeg:extent=<value-of-var name="max-filesize" />kb %source_file jpg:%target_file</converter-execute>
+  </converter>
+  <converter type-in="application/reduced-jpeg" type-out="text/xml-alchemy-image-tags" timing-name="AlchemyAPI AlchemyVision - 2. image tag service">
+    <converter-execute>curl -k <if test="$force-show-all">--data forceShowAll=1 </if>
+    <if test="$knowledge-graph">--data knowledgeGraph=1 </if>--max-time <value-of-var name="default-timeout" />    <if-var name="proxy-host-port">--proxy <value-of-var name="proxy-host-port" />
+    </if-var>    <if-var name="proxy-user-pass">--proxy-user <value-of-var name="proxy-user-pass" />
+    </if-var> --data-urlencode image@%source_file -o %target_file "<value-of-var name="alchemy-image-tagging-url" />"</converter-execute>
+  </converter>
+  <converter type-in="text/xml-alchemy-image-tags" type-out="application/vxml" timing-name="AlchemyAPI AlchemyVision - 3. image tags to VXML" >
+    <parser type="xsl">
+    <call-function name="xsl-parser-variable">
+      <with name="name">debug</with>
+      <with name="value">
+        <if-var name="debug">
+          <value-of-var name="debug" />
+        </if-var>
+      </with>
+    </call-function><![CDATA[
+<xsl:template match="/">
+<xsl:variable name="r" select="/" />
+  <document>
+  <!-- check the results from the API and add appropriate contents -->
+  <xsl:choose>
+    <xsl:when test="$r/results/status = 'OK'" >
+      <xsl:for-each select="$r/results/imageKeywords//keyword" >
+        <!-- We add one content per tag, which allows us to give a higher weight to tags with higher confidence scores. -->
+        <!-- The confidence score ranges from 0.0 to 1.0.  We add 0.5 to that to bring the weight of high confidence   -->
+        <!-- tags above the weight of the average content (1.0) -->
+        <xsl:variable name="score" select="./score" />
+        <content name="alchemyapi-image-tag" weight="{$score + 0.5}" >
+          <xsl:value-of select="./text" />
+        </content>
+        <xsl:for-each select=".//knowledgeGraph" >
+          <xsl:for-each select=".//typeHierarchy" >
+            <!-- We don't add the 0.5 to the weight in this case because we are likely to match on terms higher in the  -->
+            <!-- hierarchy, which are broader concepts and of lesser value than text in other contents.  -->
+            <content name="alchemyapi-image-tag-type" weight="{$score}" >
+              <!-- drop the leading slash character to make hierarchical faceting simple -->
+              <xsl:value-of select="viv:choose(substring(./text() , 1, 1) = '/', substring(./text(), 2), ./text())" />
+            </content>
+          </xsl:for-each>
+        </xsl:for-each>
+      </xsl:for-each>
+    </xsl:when>
+    <xsl:otherwise>
+      <xsl:call-template name="show-debug-information">
+        <xsl:with-param name="result" select="$r" />
+        <xsl:with-param name="is-debug" select="$debug" />
+        <xsl:with-param name="label">image-tag</xsl:with-param>
+      </xsl:call-template>
+    </xsl:otherwise>
+  </xsl:choose>
+  </document>
+</xsl:template>
+
+<xsl:template name="show-debug-information">
+  <xsl:param name="result" />
+  <xsl:param name="is-debug" />
+  <xsl:param name="label" />
+  <xsl:if test="$is-debug" >
+    <content name="alchemyapi-debug-{$label}-service-error" action="none" type="text">
+      <xsl:value-of select="$result/results/statusInfo" />
+    </content>
+  </xsl:if>
+</xsl:template>
+]]></parser>
+  </converter>
+</function>

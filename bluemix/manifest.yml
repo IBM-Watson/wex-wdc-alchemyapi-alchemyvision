@@ -1,0 +1,11 @@
+---
+services:
+- wex-AlchemyAPI
+applications:
+- name: wex-AlchemyVision
+  disk_quota: 512M
+  host: wex-alchemyvision
+  path: target/wex-wdc-AlchemyVision-sample.war
+  domain: mybluemix.net
+  instances: 1
+  memory: 512M
